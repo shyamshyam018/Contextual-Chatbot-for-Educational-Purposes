@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="user-scalable=yes, width=device-width, initial-scale=1.0" />
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <title>Bit Notes</title>
+
+    <link rel="icon" sizes="192x192" href="icon.png">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Montserrat');
+
+        :root {
+            --bg-color: #081b29;
+            --secondary-bg-color: #112e42;
+            --text-color: #E0FFFF;
+            --main-color:#00FA9A;  
+        }
+
+        body {
+            font-family: "Montserrat";
+            background-color: var(--bg-color);
+        }
+        i {
+            font-size: 12px;
+            clear: both;
+            font-style: normal;
+            display: block;
+        }
+        h2 {
+            margin: 10px;
+            color: white;
+        }
+        #app {
+            display: flex;
+            flex-flow: column wrap;
+            margin: 0 auto;
+            height: auto;
+            justify-content: flex-start;
+            align-content: center;
+            border: .2rem solid var(--main-color);
+            
+        }
+        #app > * {
+            border-radius: 2px;
+            transition: all ease 0.3s;
+            
+        }
+        #app>div {
+            position: relative;
+            width: 500px;
+            padding: 8px;
+            margin: 10px;
+            border: .2rem solid var(--main-color);
+            color: white;
+        }
+        
+        textarea {
+            display: var(--main-color);
+            max-width: 500px;
+            padding: 8px;
+            margin: 10px;
+            border: .2rem solid var(--main-color);
+        }
+        input {
+            border: .2rem solid var(--main-color);
+            display: block;
+            max-width: 500px;
+            padding: 8px;
+            margin: 10px;
+        }
+        textarea:focus {
+            border-color: var(--main-color);
+        }
+        button {
+            padding: 0;
+            cursor: pointer;
+            background: transparent;
+            border: 0;
+            color: #00FA9A;
+            
+        }
+        .button {
+            display: block;
+            box-sizing: content-box;
+            width: 200px;
+            padding: 8px;
+            margin: 0 10px 20px 10px;
+            border: .2rem solid var(--main-color);
+            cursor: pointer;
+            clear: both;
+        }
+        .button:hover {
+            background-color: var(--secondary-bg-color);
+            color: white;
+            border: .2rem solid var(--main-color);
+        }
+        .top {
+            text-align: right;
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: space-between;
+            margin-bottom: 0.5em;
+        }
+        
+        .close {
+            text-align: right;
+            height: 10px;
+            width: 10px;
+            position: relative;
+            box-sizing: border-box;
+            line-height: 10px;
+            display: inline-block;
+            color: white;
+        }
+        .notes {
+            padding-top: 25px;
+          
+        }
+        .close:before, .close:after {
+            transform: rotate(-45deg);
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -1px;
+            margin-left: -5px;
+            display: block;
+            height: 2px;
+            width: 10px;
+            background-color: white
+            ;
+            transition: all 0.25s ease-out;
+        }
+        .close:after {
+            transform: rotate(-135deg);
+        }
+        .close:hover:before, .close:hover:after {
+            transform: rotate(0deg);
+        }
+        /* clock.css */
+        .content.disable {
+            cursor: no-drop;
+            display: flex;
+        }
+        .content .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            padding: 0 10px;
+            border-radius: 5px;
+            border: var(--main-color);
+            width: calc(100% / 3 - 5px );
+        }
+        .content.disable .column {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .column select {
+            width: 70%;
+            height: 40px;
+            border: 2px;
+            outline: none;
+            background: none;
+            font-size: 19px;
+            display: flex;
+            color: black;
+            background-color: white;
+            border-radius: 5px;
+        }
+        /* chart  */
+        .ch {
+            margin-bottom: 10px;
+        }
+        .chart-container {
+            max-width: 80%;
+        }
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        #usagechart {
+            visibility: visible;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 0 auto;
+            max-width: 1200px; /* Adjust the width as needed */
+            padding: 20px;
+        }
+
+        .left-section {
+            flex: 1;
+            padding: 20px;
+            /* background-color: #fff; Adjust background color as needed */
+            border-radius: 10px;
+            /* box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); */
+        }
+        .right-section {
+            flex: 1;
+            padding-left: 180px;
+            padding-top: 50px;
+            /* background-color: #fff; Adjust background color as needed */
+            border-radius: 10px;
+            /* box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); */
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns, equal width */
+            gap: 20px; /* Gap between columns */
+            max-width: 10000px; /* Adjust as needed */
+            margin: 0 auto; /* Center the grid container */
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container">
+        <!-- clock -->
+        <div class="left-section">
+            <div class="clock" style="margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif;">
+                <div class="wrapper" style="display: flex; align-items: center; justify-content: center; width: 650px; padding: 30px 30px 38px;  border-radius: 10px; flex-direction: column; flex-flow: column; flex-direction: column;">
+                  <img src="clock.svg" alt="clock" style="max-width: 103px;">
+                  <h1 style="font-size: 38px; font-weight: 500; margin: 30px 0; color: white;">00:00:00 PM</h1>
+                  <div class="content" style=" width: 100%; justify-content: space-between;">
+                    <div class="column">
+                      <select>
+                        <option value="Hour" selected disabled hidden>Hour</option>
+                      </select>
+                    </div>
+                    <div class="column">
+                      <select class="min">
+                        <option value="Minute" selected disabled hidden style="color: white;">Minute</option>
+                      </select>
+                    </div>
+                    <div class="column">
+                      <select>
+                        <option value="AM/PM" selected disabled hidden style="color: white;">AM/PM</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button style=" width: 100%; border: none; outline: none; color: #fff; cursor: pointer;  font-size: 20px;  padding: 17px 0;  margin-top: 20px; border-radius: 5px; background-color: var(--main-color); width: 150px;">Set Alarm</button>
+                </div>
+                </div>
+        </div>
+        <!-- chart -->
+        <div class="right-section">
+            <h1 class="ch" style="color: white;">Website Usage Time Chart</h1>
+            <div class="chart-container">
+               <canvas id="usageChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- notes -->
+    <div class="notes">
+        <div id="app">
+            <h2>{{ title }}</h2>
+
+            <input v-model="heading" placeholder="Enter heading for the notes" />
+
+            <textarea autofocus placeholder="Insert your note..." v-model="note.text"></textarea>
+
+            <button class="button" @click="addNote">Add Note</button>
+
+            <div v-for="(note, index) in notes">
+                <div class="top">
+                    <button class="close" @click="removeNote(index)"></button>
+                    <i>{{ note.date }}</i>
+                </div>
+                <strong>{{ note.heading }}</strong><br>
+                {{ note.text }}
+            </div>
+        </div>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                title: 'Bit Notes',
+                heading: '', // New heading property
+                note: {
+                    text: '',
+                    date: ''
+                },
+                notes: [{
+                    heading: 'Bit Notes',
+                    text: 'Initial note',
+                    date: new Date(Date.now()).toLocaleString()
+                }]
+            },
+            methods: {
+                addNote() {
+                    let { text } = this.note;
+                    if (text === '') {
+                        return;
+                    }
+                    this.notes.push({
+                        heading: this.heading, // Store the heading
+                        text,
+                        date: new Date(Date.now()).toLocaleString(),
+                    });
+                    this.heading = ''; // Clear the heading input
+                    this.note.text = '';
+                },
+                removeNote(index) {
+                    this.$delete(this.notes, index);
+                },
+            },
+            mounted() {
+                if (localStorage.getItem('notes')) this.notes = JSON.parse(localStorage.getItem('notes'));
+            },
+            watch: {
+                notes: {
+                    handler() {
+                        localStorage.setItem('notes', JSON.stringify(this.notes));
+                    },
+                    deep: true,
+                },
+            },
+        });
+    </script>
+    <!-- Clock -->
+    <script>
+        const currentTime = document.querySelector("h1"),
+content = document.querySelector(".content"),
+selectMenu = document.querySelectorAll("select"),
+setAlarmBtn = document.querySelector("button");
+
+let alarmTime, isAlarmSet,
+ringtone = new Audio("ringtone.mp3");
+
+for (let i = 12; i > 0; i--) {
+    i = i < 10 ? `0${i}` : i;
+    let option = `<option value="${i}">${i}</option>`;
+    selectMenu[0].firstElementChild.insertAdjacentHTML("afterend", option);
+}
+
+for (let i = 59; i >= 0; i--) {
+    i = i < 10 ? `0${i}` : i;
+    let option = `<option value="${i}">${i}</option>`;
+    selectMenu[1].firstElementChild.insertAdjacentHTML("afterend", option);
+}
+
+for (let i = 2; i > 0; i--) {
+    let ampm = i == 1 ? "AM" : "PM";
+    let option = `<option value="${ampm}">${ampm}</option>`;
+    selectMenu[2].firstElementChild.insertAdjacentHTML("afterend", option);
+}
+
+setInterval(() => {
+    let date = new Date(),
+    h = date.getHours(),
+    m = date.getMinutes(),
+    s = date.getSeconds(),
+    ampm = "AM";
+    if(h >= 12) {
+        h = h - 12;
+        ampm = "PM";
+    }
+    h = h == 0 ? h = 12 : h;
+    h = h < 10 ? "0" + h : h;
+    m = m < 10 ? "0" + m : m;
+    s = s < 10 ? "0" + s : s;
+    currentTime.innerText = `${h}:${m}:${s} ${ampm}`;
+
+    if (isAlarmSet && alarmTime === `${h}:${m} ${ampm}`) {
+        ringtone.play();
+        ringtone.loop = true;
+        showAlert();
+    }
+});
+
+function showAlert() {
+    if (confirm("Alarm time reached! Stop the alarm?")) {
+        setAlarm();
+    }
+}
+
+function setAlarm() {
+    if (isAlarmSet) {
+        alarmTime = "";
+        ringtone.pause();
+        ringtone.currentTime = 0; // Reset the ringtone to the beginning
+        content.classList.remove("disable");
+        setAlarmBtn.innerText = "Set Alarm";
+        return isAlarmSet = false;
+    }
+
+    let time = `${selectMenu[0].value}:${selectMenu[1].value} ${selectMenu[2].value}`;
+    if (time.includes("Hour") || time.includes("Minute") || time.includes("AM/PM")) {
+        return alert("Please, select a valid time to set Alarm!");
+    }
+    alarmTime = time;
+    isAlarmSet = true;
+    content.classList.add("disable");
+    setAlarmBtn.innerText = "Clear Alarm";
+}
+
+setAlarmBtn.addEventListener("click", setAlarm);
+
+</script>
+    <!-- chart -->
+    <script>
+        // Load usageData from local storage if it exists
+let usageData = JSON.parse(localStorage.getItem('usageData')) || {
+    usedTime: 0,
+    notUsedTime: 0,
+};
+
+let lastInteractionTime = new Date().getTime(); // Initialize with current time
+
+const ctx = document.getElementById('usageChart').getContext('2d');
+let usageChart;
+
+function updateChart() {
+    const currentTime = new Date().getTime();
+    const timeDiffMinutes = Math.floor((currentTime - lastInteractionTime) / (1000 * 60)); // Calculate time difference in minutes
+
+    // Calculate the total time in a 24-hour period
+    const totalMinutesInDay = 200;
+
+    // Calculate notUsedTime dynamically based on usedTime and the total time
+    usageData.notUsedTime = totalMinutesInDay - usageData.usedTime;
+
+    // Update last interaction time
+    lastInteractionTime = currentTime;
+
+    // Save usageData to local storage
+    localStorage.setItem('usageData', JSON.stringify(usageData));
+
+    if (usageChart) {
+        usageChart.destroy(); // Destroy the existing chart instance
+    }
+
+    usageChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Used Time', 'Not Used Time'],
+            datasets: [{
+                data: [usageData.usedTime, usageData.notUsedTime],
+                backgroundColor: [
+                     // Red for used time
+                    'rgba(0, 255, 0, 0.6)', 
+                    'rgba(255, 0, 0, 0.6)',// Green for not used time
+                ],
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                },
+            },
+        },
+    });
+}
+
+function simulateUserActivity() {
+    // Simulate user activity
+    usageData.usedTime++; // Increment usedTime
+    updateChart();
+}
+
+// Simulate user activity every 5 seconds
+setInterval(simulateUserActivity, 5000);
+
+// Initial update
+updateChart();
+
+// Save usageData to local storage when the user leaves the page
+window.addEventListener('beforeunload', function () {
+    localStorage.setItem('usageData', JSON.stringify(usageData));
+});
+
+    </script>
+
+</body>
+
+</html>

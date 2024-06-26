@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Design by foolishdeveloper.com -->
     <title>Login Page</title>
  
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
-    <!--Stylesheet-->
     <style media="screen">
-      *,
+        /* ... (your existing CSS styles) ... */
+        *,
 *:before,
 *:after{
     padding: 0;
@@ -17,7 +16,8 @@
     box-sizing: border-box;
 }
 body{
-    background-color: #080710;
+    background-color: #112e42;
+    color: #E0FFFF;
 }
 .background{
     width: 430px;
@@ -35,8 +35,8 @@ body{
 }
 .shape:first-child{
     background: linear-gradient(
-        #1845ad,
-        #23a2f6
+        #E0FFFF,
+        #00FA9A
     );
     left: -80px;
     top: -80px;
@@ -44,8 +44,8 @@ body{
 .shape:last-child{
     background: linear-gradient(
         to right,
-        #ff512f,
-        #f09819
+        #00FA9A,
+        #E0FFFF
     );
     right: -30px;
     bottom: -80px;
@@ -101,7 +101,7 @@ input{
 button{
     margin-top: 50px;
     width: 100%;
-    background-color: #ffffff;
+    background-color:#E0FFFF ;
     color: #080710;
     padding: 15px 0;
     font-size: 18px;
@@ -133,13 +133,30 @@ button{
 }
 
     </style>
+    <script>
+        function validateForm() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            
+            if (username === "" && password === "") {
+                alert("Please enter your username and password.");
+                return false;
+            } else if (username === "") {
+                alert("Please enter your username.");
+                return false;
+            } else if (password === "") {
+                alert("Please enter your password.");
+                return false;
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="background">
         <div class="shape"></div>
         <div class="shape"></div>
     </div>
-    <form method="post">
+    <form method="post" onsubmit="return validateForm();">
         <h3>Login Here</h3>
         {% csrf_token %} 
         <label for="username">Username</label>
@@ -149,12 +166,7 @@ button{
         <input type="password" placeholder="Password" id="password" name="pass">
 
         <button type="submit">Log In</button>
-        <!-- <input type="button" value=""> -->
-        <!-- <div class="social">
-          <div class="go"><i class="fab fa-google"></i>  Google</div>
-          <div class="fb"><i class="fab fa-facebook"></i>  Facebook</div>
-        </div> -->
-        <a href="{% url 'signup' %}" >Create a account</a>
+        <a href="{% url 'signup' %}" >Create an account</a>
     </form>
 </body>
 </html>
